@@ -15,7 +15,7 @@ RUN apt-get update && \
     libncurses-dev \
     libcurl4-openssl-dev \
     liblua5.4-dev \
-    liblua5.4 \
+    lua5.4 \
     && \
     rm -rf /var/lib/apt/lists/*
 
