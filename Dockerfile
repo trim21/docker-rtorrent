@@ -48,7 +48,6 @@ RUN apt-get update && \
     libncurses6 \
     libstdc++6 \
     ca-certificates \
-    libssl-dev \
     && \
     rm -rf /var/lib/apt/lists/*
 
