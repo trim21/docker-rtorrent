@@ -51,16 +51,10 @@ RUN apt-get update && \
     && \
     rm -rf /var/lib/apt/lists/*
 
-RUN groupadd -r download && \
-    useradd -r -g download -d /home/download -s /sbin/nologin -c "rtorrent user" download
-
 COPY --from=build-stage /usr/local/bin/rtorrent /usr/local/bin/rtorrent
 COPY --from=build-stage /usr/local/lib/libtorrent.so.* /usr/local/lib/
 COPY --from=build-stage /usr/local/lib/libtorrent-rasterbar.so.* /usr/local/lib/
 
 RUN ldconfig
-
-USER download
-WORKDIR /home/download
 
 ENTRYPOINT ["/usr/local/bin/rtorrent"]
