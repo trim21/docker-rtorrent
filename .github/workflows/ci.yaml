@@ -43,6 +43,7 @@ jobs:
             type=ref,event=branch
             type=ref,event=pr
             type=sha
+            type=raw,value=v0.15.0
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
