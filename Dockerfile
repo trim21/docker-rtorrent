@@ -1,4 +1,4 @@
-FROM debian:13-slim@sha256:fb6a168c24c6bb598f73c1ec6270c692eb2379b54f2936425996b7ddddb8a720 AS build-stage
+FROM debian:13-slim@sha256:1caf1c703c8f7e15dcf2e7769b35000c764e6f50e4d7401c355fb0248f3ddfdb AS build-stage
 
 ENV LIBTORRENT_VERSION=0.15.7
 ENV RTORRENT_VERSION=0.15.7
@@ -41,7 +41,7 @@ RUN tar xzf rtorrent-${RTORRENT_VERSION}.tar.gz && \
     make -j$(nproc) && \
     make install
 
-FROM debian:13-slim@sha256:fb6a168c24c6bb598f73c1ec6270c692eb2379b54f2936425996b7ddddb8a720
+FROM debian:13-slim@sha256:1caf1c703c8f7e15dcf2e7769b35000c764e6f50e4d7401c355fb0248f3ddfdb
 
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
