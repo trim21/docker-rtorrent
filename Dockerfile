@@ -41,7 +41,7 @@ RUN tar xzf rtorrent-${RTORRENT_VERSION}.tar.gz && \
     make -j$(nproc) && \
     make install
 
-FROM debian:13-slim@sha256:c2880112cc5c61e1200c26f106e4123627b49726375eb5846313da9cca117337
+FROM debian:13-slim@sha256:fb6a168c24c6bb598f73c1ec6270c692eb2379b54f2936425996b7ddddb8a720
 
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
