@@ -127,9 +127,11 @@ jobs:
       # Push the already-built image to registry after tests pass (non-PR only)
       - name: Push Docker image
         if: github.event_name != 'pull_request'
+        env:
+          JSON_OUTPUT: ${{ steps.meta.outputs.json }}
         run: |
           # Push all tags for this image using JSON output
-          printf '%s\n' '${{ steps.meta.outputs.json }}' | jq -r '.tags[]' | while read -r tag; do
+          echo "$JSON_OUTPUT" | jq -r '.tags[]' | while read -r tag; do
             echo "Pushing $tag"
             docker push "$tag"
           done
