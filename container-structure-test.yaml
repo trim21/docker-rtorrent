@@ -1,0 +1,22 @@
+schemaVersion: 2.0.0
+
+# Test that rtorrent binary and required libraries exist
+fileExistenceTests:
+  - name: 'rtorrent binary'
+    path: '/usr/local/bin/rtorrent'
+    shouldExist: true
+    permissions: '-rwxr-xr-x'
+  - name: 'SSL library'
+    path: '/usr/lib/x86_64-linux-gnu/libssl.so.3'
+    shouldExist: true
+
+# Test that rtorrent can run and displays correct version
+commandTests:
+  - name: "rtorrent help"
+    command: "rtorrent"
+    args: ["-h"]
+    expectedOutput: ["Usage:.*rtorrent"]
+  - name: "rtorrent version"
+    command: "rtorrent"
+    args: ["-h"]
+    expectedOutput: ["0\\.15\\.7"]
