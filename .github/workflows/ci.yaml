@@ -38,6 +38,7 @@ jobs:
             tags: |
               type=raw,value=v0.15.7
               type=raw,value=v0.15
+              type=raw,value=stable
           - version: '0.15.6'
             tags: |
               type=raw,value=v0.15.6
@@ -128,6 +129,7 @@ jobs:
             echo "Pushing $tag"
             docker push "$tag"
           done
+
 
 
 
