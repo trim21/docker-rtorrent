@@ -28,7 +28,7 @@ RUN curl -sSL https://github.com/rakshasa/rtorrent/archive/refs/tags/v${RTORRENT
 RUN tar xzf libtorrent-${LIBTORRENT_VERSION}.tar.gz && \
     cd libtorrent-${LIBTORRENT_VERSION} && \
     autoreconf -ivf && \
-    ./configure && \
+    ./configure --disable-shared --enable-static && \
     make -j$(nproc) && \
     make install
 
@@ -55,9 +55,5 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/*
 
 COPY --from=build-stage /usr/local/bin/rtorrent /usr/local/bin/rtorrent
-COPY --from=build-stage /usr/local/lib/libtorrent.so.* /usr/local/lib/
-COPY --from=build-stage /usr/local/lib/libtorrent-rasterbar.so.* /usr/local/lib/
-
-RUN ldconfig
 
 ENTRYPOINT ["/usr/local/bin/rtorrent"]
