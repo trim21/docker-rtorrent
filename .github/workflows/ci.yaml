@@ -47,12 +47,62 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Build and push Docker image
+      # Extract version from Dockerfile to avoid hardcoding
+      - name: Extract version from Dockerfile
+        id: version
+        run: |
+          RTORRENT_VERSION=$(grep '^ENV RTORRENT_VERSION=' Dockerfile | cut -d'=' -f2)
+          echo "version=$RTORRENT_VERSION" >> "$GITHUB_OUTPUT"
+          echo "Extracted rtorrent version: $RTORRENT_VERSION"
+
+      # Build the Docker image once and load it locally for testing
+      - name: Build Docker image
         uses: docker/build-push-action@v6
         with:
           context: .
-          push: ${{ github.event_name != 'pull_request' }}
+          push: false
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+          load: true
+
+      # Test the built image by running rtorrent with --help flag
+      - name: Test container - run rtorrent help
+        run: |
+          # Extract the first tag for testing
+          IMAGE_TAG=$(echo "${{ steps.meta.outputs.tags }}" | head -n1)
+          echo "Testing image: $IMAGE_TAG"
+          
+          # Run rtorrent with --help to verify it works
+          docker run --rm "$IMAGE_TAG" -h | grep -q "Usage:"
+          echo "✓ rtorrent help command succeeded"
+          
+          # Verify rtorrent version matches the Dockerfile
+          docker run --rm "$IMAGE_TAG" -h | grep -q "${{ steps.version.outputs.version }}"
+          echo "✓ rtorrent version ${{ steps.version.outputs.version }} verified"
+
+      # Install and run container structure tests
+      - name: Run container structure tests
+        run: |
+          # Download container-structure-test
+          curl -LO https://storage.googleapis.com/container-structure-test/latest/container-structure-test-linux-amd64
+          chmod +x container-structure-test-linux-amd64
+          sudo mv container-structure-test-linux-amd64 /usr/local/bin/container-structure-test
+          
+          # Extract the first tag for testing
+          IMAGE_TAG=$(echo "${{ steps.meta.outputs.tags }}" | head -n1)
+          echo "Running structure tests on image: $IMAGE_TAG"
+          
+          # Run the structure tests
+          container-structure-test test --image "$IMAGE_TAG" --config container-structure-test.yaml
+
+      # Push the already-built image to registry after tests pass (non-PR only)
+      - name: Push Docker image
+        if: github.event_name != 'pull_request'
+        run: |
+          # Push all tags for this image
+          echo "${{ steps.meta.outputs.tags }}" | while read -r tag; do
+            echo "Pushing $tag"
+            docker push "$tag"
+          done
