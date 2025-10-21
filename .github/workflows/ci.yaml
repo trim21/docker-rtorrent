@@ -74,13 +74,6 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      # Set version from matrix
-      - name: Set version
-        id: version
-        run: |
-          echo "version=${{ matrix.version }}" >> "$GITHUB_OUTPUT"
-          echo "Using rtorrent version: ${{ matrix.version }}"
-
       # Build the Docker image once and load it locally for testing
       - name: Build Docker image
         uses: docker/build-push-action@v6
@@ -107,8 +100,8 @@ jobs:
           echo "✓ rtorrent help command succeeded"
           
           # Verify rtorrent version matches the Dockerfile
-          docker run --rm "$IMAGE_TAG" -h | grep -q "${{ steps.version.outputs.version }}"
-          echo "✓ rtorrent version ${{ steps.version.outputs.version }} verified"
+          docker run --rm "$IMAGE_TAG" -h | grep -q "${{ matrix.version }}"
+          echo "✓ rtorrent version ${{ matrix.version }} verified"
 
       # Install and run container structure tests
       - name: Run container structure tests
