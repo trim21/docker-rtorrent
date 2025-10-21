@@ -23,6 +23,7 @@ jobs:
       contents: read
       packages: write
     strategy:
+      fail-fast: false
       matrix:
         include:
           - version: '0.16.1'
@@ -142,4 +143,5 @@ jobs:
             echo "Pushing $tag"
             docker push "$tag"
           done
+
 
