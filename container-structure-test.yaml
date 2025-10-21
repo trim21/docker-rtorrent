@@ -10,13 +10,9 @@ fileExistenceTests:
     path: '/usr/lib/x86_64-linux-gnu/libssl.so.3'
     shouldExist: true
 
-# Test that rtorrent can run and displays correct version
+# Test that rtorrent can run and displays help
 commandTests:
   - name: "rtorrent help"
     command: "rtorrent"
     args: ["-h"]
     expectedOutput: ["Usage:.*rtorrent"]
-  - name: "rtorrent version"
-    command: "rtorrent"
-    args: ["-h"]
-    expectedOutput: ["0\\.15\\.7"]

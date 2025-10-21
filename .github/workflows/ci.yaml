@@ -47,6 +47,14 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
+      # Extract version from Dockerfile to avoid hardcoding
+      - name: Extract version from Dockerfile
+        id: version
+        run: |
+          RTORRENT_VERSION=$(grep '^ENV RTORRENT_VERSION=' Dockerfile | cut -d'=' -f2)
+          echo "version=$RTORRENT_VERSION" >> "$GITHUB_OUTPUT"
+          echo "Extracted rtorrent version: $RTORRENT_VERSION"
+
       # Build the Docker image once and load it locally for testing
       - name: Build Docker image
         uses: docker/build-push-action@v6
@@ -70,9 +78,9 @@ jobs:
           docker run --rm "$IMAGE_TAG" -h | grep -q "Usage:"
           echo "✓ rtorrent help command succeeded"
           
-          # Verify rtorrent version
-          docker run --rm "$IMAGE_TAG" -h | grep -q "0.15.7"
-          echo "✓ rtorrent version 0.15.7 verified"
+          # Verify rtorrent version matches the Dockerfile
+          docker run --rm "$IMAGE_TAG" -h | grep -q "${{ steps.version.outputs.version }}"
+          echo "✓ rtorrent version ${{ steps.version.outputs.version }} verified"
 
       # Install and run container structure tests
       - name: Run container structure tests
