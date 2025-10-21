@@ -1,7 +1,7 @@
 FROM debian:13-slim@sha256:66b37a5078a77098bfc80175fb5eb881a3196809242fd295b25502854e12cbec AS build-stage
 
-ENV LIBTORRENT_VERSION=0.15.7
-ENV RTORRENT_VERSION=0.15.7
+ARG LIBTORRENT_VERSION=0.15.7
+ARG RTORRENT_VERSION=0.15.7
 
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
