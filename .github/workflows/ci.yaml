@@ -3,10 +3,10 @@ name: CI
 on:
   push:
     branches:
-      - master
+      - main
   pull_request:
     branches:
-      - master
+      - main
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -22,6 +22,9 @@ jobs:
     permissions:
       contents: read
       packages: write
+    strategy:
+      matrix:
+        version: ['0.15.7']
 
     steps:
       - name: Checkout repository
@@ -42,18 +45,17 @@ jobs:
           tags: |
             type=ref,event=branch
             type=ref,event=pr
-            type=raw,value=v0.15.7
+            type=raw,value=v${{ matrix.version }}
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      # Extract version from Dockerfile to avoid hardcoding
-      - name: Extract version from Dockerfile
+      # Set version from matrix
+      - name: Set version
         id: version
         run: |
-          RTORRENT_VERSION=$(grep '^ENV RTORRENT_VERSION=' Dockerfile | cut -d'=' -f2)
-          echo "version=$RTORRENT_VERSION" >> "$GITHUB_OUTPUT"
-          echo "Extracted rtorrent version: $RTORRENT_VERSION"
+          echo "version=${{ matrix.version }}" >> "$GITHUB_OUTPUT"
+          echo "Using rtorrent version: ${{ matrix.version }}"
 
       # Build the Docker image once and load it locally for testing
       - name: Build Docker image
@@ -66,6 +68,9 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
           load: true
+          build-args: |
+            LIBTORRENT_VERSION=${{ matrix.version }}
+            RTORRENT_VERSION=${{ matrix.version }}
 
       # Test the built image by running rtorrent with --help flag
       - name: Test container - run rtorrent help
