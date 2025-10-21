@@ -28,7 +28,7 @@ RUN curl -sSL https://github.com/rakshasa/rtorrent/archive/refs/tags/v${RTORRENT
 RUN tar xzf libtorrent-${LIBTORRENT_VERSION}.tar.gz && \
     cd libtorrent-${LIBTORRENT_VERSION} && \
     autoreconf -ivf && \
-    ./configure && \
+    ./configure --disable-shared --enable-static && \
     make -j$(nproc) && \
     make install
 
