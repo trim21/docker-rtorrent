@@ -50,16 +50,6 @@ jobs:
           - version: '0.15.3'
             tags: |
               type=raw,value=v0.15.3
-          - version: '0.15.2'
-            tags: |
-              type=raw,value=v0.15.2
-          - version: '0.15.1'
-            tags: |
-              type=raw,value=v0.15.1
-          - version: '0.10.0'
-            tags: |
-              type=raw,value=v0.10.0
-              type=raw,value=v0.10
 
     steps:
       - name: Checkout repository
@@ -143,5 +133,6 @@ jobs:
             echo "Pushing $tag"
             docker push "$tag"
           done
+
 
 
