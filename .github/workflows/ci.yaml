@@ -130,7 +130,7 @@ jobs:
         run: |
           # Push all tags for this image using JSON output
           echo '${{ steps.meta.outputs.json }}' | jq -r '.tags[]' | while read -r tag; do
-            echo "Pushing $tag"
+            echo "Pushing \"$tag\""
             docker push "$tag"
           done
 
