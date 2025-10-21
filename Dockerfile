@@ -55,9 +55,5 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/*
 
 COPY --from=build-stage /usr/local/bin/rtorrent /usr/local/bin/rtorrent
-COPY --from=build-stage /usr/local/lib/libtorrent.so.* /usr/local/lib/
-COPY --from=build-stage /usr/local/lib/libtorrent-rasterbar.so.* /usr/local/lib/
-
-RUN ldconfig
 
 ENTRYPOINT ["/usr/local/bin/rtorrent"]
