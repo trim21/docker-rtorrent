@@ -25,14 +25,40 @@ jobs:
     strategy:
       matrix:
         include:
-          - version: '0.15.7'
-            tags: |
-              type=raw,value=v0.15.7
-              type=raw,value=v0.15
           - version: '0.16.1'
             tags: |
               type=raw,value=v0.16.1
               type=raw,value=v0.16
+              type=raw,value=latest
+          - version: '0.16.0'
+            tags: |
+              type=raw,value=v0.16.0
+          - version: '0.15.7'
+            tags: |
+              type=raw,value=v0.15.7
+              type=raw,value=v0.15
+          - version: '0.15.6'
+            tags: |
+              type=raw,value=v0.15.6
+          - version: '0.15.5'
+            tags: |
+              type=raw,value=v0.15.5
+          - version: '0.15.4'
+            tags: |
+              type=raw,value=v0.15.4
+          - version: '0.15.3'
+            tags: |
+              type=raw,value=v0.15.3
+          - version: '0.15.2'
+            tags: |
+              type=raw,value=v0.15.2
+          - version: '0.15.1'
+            tags: |
+              type=raw,value=v0.15.1
+          - version: '0.10.0'
+            tags: |
+              type=raw,value=v0.10.0
+              type=raw,value=v0.10
 
     steps:
       - name: Checkout repository
