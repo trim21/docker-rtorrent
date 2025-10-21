@@ -22,6 +22,34 @@ jobs:
     permissions:
       contents: read
       packages: write
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - version: '0.16.1'
+            tags: |
+              type=raw,value=v0.16.1
+              type=raw,value=v0.16
+              type=raw,value=latest
+          - version: '0.16.0'
+            tags: |
+              type=raw,value=v0.16.0
+          - version: '0.15.7'
+            tags: |
+              type=raw,value=v0.15.7
+              type=raw,value=v0.15
+          - version: '0.15.6'
+            tags: |
+              type=raw,value=v0.15.6
+          - version: '0.15.5'
+            tags: |
+              type=raw,value=v0.15.5
+          - version: '0.15.4'
+            tags: |
+              type=raw,value=v0.15.4
+          - version: '0.15.3'
+            tags: |
+              type=raw,value=v0.15.3
 
     steps:
       - name: Checkout repository
@@ -39,21 +67,19 @@ jobs:
         uses: docker/metadata-action@v5
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
-          tags: |
-            type=ref,event=branch
-            type=ref,event=pr
-            type=raw,value=v0.15.7
+          flavor: |
+            latest=false
+          tags: ${{ matrix.tags }}
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      # Extract version from Dockerfile to avoid hardcoding
-      - name: Extract version from Dockerfile
+      # Set version from matrix
+      - name: Set version
         id: version
         run: |
-          RTORRENT_VERSION=$(grep '^ENV RTORRENT_VERSION=' Dockerfile | cut -d'=' -f2)
-          echo "version=$RTORRENT_VERSION" >> "$GITHUB_OUTPUT"
-          echo "Extracted rtorrent version: $RTORRENT_VERSION"
+          echo "version=${{ matrix.version }}" >> "$GITHUB_OUTPUT"
+          echo "Using rtorrent version: ${{ matrix.version }}"
 
       # Build the Docker image once and load it locally for testing
       - name: Build Docker image
@@ -66,12 +92,14 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
           load: true
+          build-args: |
+            LIBTORRENT_VERSION=${{ matrix.version }}
+            RTORRENT_VERSION=${{ matrix.version }}
 
       # Test the built image by running rtorrent with --help flag
       - name: Test container - run rtorrent help
         run: |
-          # Extract the first tag for testing
-          IMAGE_TAG=$(echo "${{ steps.meta.outputs.tags }}" | head -n1)
+          IMAGE_TAG="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:v${{ matrix.version }}"
           echo "Testing image: $IMAGE_TAG"
           
           # Run rtorrent with --help to verify it works
@@ -90,8 +118,7 @@ jobs:
           chmod +x container-structure-test-linux-amd64
           sudo mv container-structure-test-linux-amd64 /usr/local/bin/container-structure-test
           
-          # Extract the first tag for testing
-          IMAGE_TAG=$(echo "${{ steps.meta.outputs.tags }}" | head -n1)
+          IMAGE_TAG="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:v${{ matrix.version }}"
           echo "Running structure tests on image: $IMAGE_TAG"
           
           # Run the structure tests
@@ -101,8 +128,11 @@ jobs:
       - name: Push Docker image
         if: github.event_name != 'pull_request'
         run: |
-          # Push all tags for this image
-          echo "${{ steps.meta.outputs.tags }}" | while read -r tag; do
+          # Push all tags for this image using JSON output
+          echo '${{ steps.meta.outputs.json }}' | jq -r '.tags[]' | while read -r tag; do
             echo "Pushing $tag"
             docker push "$tag"
           done
+
+
+
