@@ -3,10 +3,10 @@ name: CI
 on:
   push:
     branches:
-      - main
+      - master
   pull_request:
     branches:
-      - main
+      - master
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -24,7 +24,7 @@ jobs:
       packages: write
     strategy:
       matrix:
-        version: ['0.15.7']
+        version: ['0.15.7', '0.16.1']
 
     steps:
       - name: Checkout repository
@@ -43,8 +43,6 @@ jobs:
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: |
-            type=ref,event=branch
-            type=ref,event=pr
             type=raw,value=v${{ matrix.version }}
 
       - name: Set up Docker Buildx
@@ -111,3 +109,4 @@ jobs:
             echo "Pushing $tag"
             docker push "$tag"
           done
+
