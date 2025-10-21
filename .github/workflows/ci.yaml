@@ -73,7 +73,8 @@ jobs:
       # Test the built image by running rtorrent with --help flag
       - name: Test container - run rtorrent help
         run: |
-          IMAGE_TAG="${{ steps.meta.outputs.tags }}"
+          # Extract the first tag for testing
+          IMAGE_TAG=$(echo "${{ steps.meta.outputs.tags }}" | head -n1)
           echo "Testing image: $IMAGE_TAG"
           
           # Run rtorrent with --help to verify it works
@@ -92,7 +93,8 @@ jobs:
           chmod +x container-structure-test-linux-amd64
           sudo mv container-structure-test-linux-amd64 /usr/local/bin/container-structure-test
           
-          IMAGE_TAG="${{ steps.meta.outputs.tags }}"
+          # Extract the first tag for testing
+          IMAGE_TAG=$(echo "${{ steps.meta.outputs.tags }}" | head -n1)
           echo "Running structure tests on image: $IMAGE_TAG"
           
           # Run the structure tests
@@ -102,7 +104,9 @@ jobs:
       - name: Push Docker image
         if: github.event_name != 'pull_request'
         run: |
-          IMAGE_TAG="${{ steps.meta.outputs.tags }}"
-          echo "Pushing $IMAGE_TAG"
-          docker push "$IMAGE_TAG"
+          # Push all tags for this image
+          echo "${{ steps.meta.outputs.tags }}" | while read -r tag; do
+            echo "Pushing $tag"
+            docker push "$tag"
+          done
 
