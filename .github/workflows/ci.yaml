@@ -24,7 +24,15 @@ jobs:
       packages: write
     strategy:
       matrix:
-        version: ['0.15.7', '0.16.1']
+        include:
+          - version: '0.15.7'
+            tags: |
+              type=raw,value=v0.15.7
+              type=raw,value=v0.15
+          - version: '0.16.1'
+            tags: |
+              type=raw,value=v0.16.1
+              type=raw,value=v0.16
 
     steps:
       - name: Checkout repository
@@ -42,8 +50,9 @@ jobs:
         uses: docker/metadata-action@v5
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
-          tags: |
-            type=raw,value=v${{ matrix.version }}
+          flavor: |
+            latest=false
+          tags: ${{ matrix.tags }}
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
