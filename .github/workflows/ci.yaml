@@ -129,8 +129,8 @@ jobs:
         if: github.event_name != 'pull_request'
         run: |
           # Push all tags for this image using JSON output
-          echo '${{ steps.meta.outputs.json }}' | jq -r '.tags[]' | while read -r tag; do
-            echo "Pushing \"$tag\""
+          printf '%s\n' '${{ steps.meta.outputs.json }}' | jq -r '.tags[]' | while read -r tag; do
+            echo "Pushing $tag"
             docker push "$tag"
           done
 
