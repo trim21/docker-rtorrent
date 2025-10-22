@@ -47,7 +47,7 @@ RUN apt-get update && \
     apt-get install -y --no-install-recommends \
     libssl3 \
     libcurl4 \
-    libncursesw6 \
+    libncurses6 \
     libstdc++6 \
     liblua5.4 \
     ca-certificates \
