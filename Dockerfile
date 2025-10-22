@@ -1,55 +1,73 @@
-FROM debian:13-slim@sha256:66b37a5078a77098bfc80175fb5eb881a3196809242fd295b25502854e12cbec AS build-stage
+# syntax=docker/dockerfile:1
 
 ARG LIBTORRENT_VERSION=0.15.7
 ARG RTORRENT_VERSION=0.15.7
 
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends \
-    build-essential \
-    libtool \
-    ca-certificates \
+FROM debian:13-slim@sha256:66b37a5078a77098bfc80175fb5eb881a3196809242fd295b25502854e12cbec AS base
+
+RUN apt-get update
+
+FROM base AS src
+ARG LIBTORRENT_VERSION
+ARG RTORRENT_VERSION
+RUN apt-get install -y --no-install-recommends \
     curl \
-    automake \
-    pkg-config \
-    libssl-dev \
-    libncurses-dev \
-    libcurl4-openssl-dev \
-    liblua5.4-dev \
-    lua5.4 \
-    && \
-    rm -rf /var/lib/apt/lists/*
+    ca-certificates
 
 WORKDIR /usr/src
 
 RUN curl -sSL https://github.com/rakshasa/libtorrent/archive/refs/tags/v${LIBTORRENT_VERSION}.tar.gz -o libtorrent-${LIBTORRENT_VERSION}.tar.gz
 RUN curl -sSL https://github.com/rakshasa/rtorrent/archive/refs/tags/v${RTORRENT_VERSION}.tar.gz -o rtorrent-${RTORRENT_VERSION}.tar.gz
 
-
 RUN tar xzf libtorrent-${LIBTORRENT_VERSION}.tar.gz && \
-    cd libtorrent-${LIBTORRENT_VERSION} && \
+    mv libtorrent-${LIBTORRENT_VERSION} /libtorrent && \
+    tar xzf rtorrent-${RTORRENT_VERSION}.tar.gz && \
+    mv rtorrent-${RTORRENT_VERSION} /rtorrent
+
+FROM base AS build-stage
+
+WORKDIR /usr/src
+
+RUN apt-get update -y && \
+    apt-get install -y --no-install-recommends \
+        build-essential \
+        libtool \
+        automake \
+        libcurl4-openssl-dev \
+        libncurses-dev \
+        liblua5.4-dev \
+        zlib1g-dev \
+        lua5.4
+
+COPY --from=src /libtorrent /libtorrent/
+COPY --from=src /rtorrent /rtorrent/
+
+RUN cd /libtorrent && \
     autoreconf -ivf && \
-    ./configure --disable-shared --enable-static && \
-    make -j$(nproc) && \
+    ./configure --enable-aligned --disable-shared --enable-static && \
+    make -j$(nproc) CXXFLAGS="-w -O3 -flto -Werror=odr -Werror=lto-type-mismatch -Werror=strict-aliasing" && \
     make install
 
 WORKDIR /usr/src
 
-RUN tar xzf rtorrent-${RTORRENT_VERSION}.tar.gz && \
-    cd rtorrent-${RTORRENT_VERSION} && \
+RUN cd /rtorrent/ && \
     autoreconf -ivf && \
-    ./configure --with-xmlrpc-tinyxml2 --with-posix-fallocate --with-lua && \
-    make -j$(nproc) && \
+    ./configure --with-ncurses --without-ncursesw --with-xmlrpc-tinyxml2 --with-posix-fallocate && \
+    make -j$(nproc) CXXFLAGS="-w -O3 -flto -Werror=odr -Werror=lto-type-mismatch -Werror=strict-aliasing" && \
     make install
 
-FROM debian:13-slim@sha256:66b37a5078a77098bfc80175fb5eb881a3196809242fd295b25502854e12cbec
-
-RUN apt-get update && \
+#
+FROM base
+#
+RUN apt-get update -y && \
     apt-get install -y --no-install-recommends \
     libssl3 \
-    libcurl4 \
+    libcurl4t64 \
+    libgcc-s1 \
     libncurses6 \
     libstdc++6 \
     liblua5.4 \
+    zlib1g \
     ca-certificates \
     && \
     rm -rf /var/lib/apt/lists/*
