@@ -17,14 +17,11 @@ RUN apt-get install -y --no-install-recommends \
 
 WORKDIR /usr/src
 
-#https://github.com/rakshasa/libtorrent/archive/919d23923ad0a483fa24441093eda1c12cea4c0b.zip
-RUN curl -sSL https://github.com/rakshasa/libtorrent/archive/${LIBTORRENT_VERSION}.tar.gz -o libtorrent-${LIBTORRENT_VERSION}.tar.gz
-RUN curl -sSL https://github.com/rakshasa/rtorrent/archive/${RTORRENT_VERSION}.tar.gz -o rtorrent-${RTORRENT_VERSION}.tar.gz
-
 RUN git clone https://github.com/rakshasa/libtorrent /libtorrent --depth=1 --branch ${LIBTORRENT_VERSION}
 RUN git clone https://github.com/rakshasa/rtorrent /rtorrent --depth=1 --branch ${LIBTORRENT_VERSION}
 
 FROM base AS build-stage
+ARG EXTRA_CONFIGURE_ARGS
 
 WORKDIR /usr/src
 
