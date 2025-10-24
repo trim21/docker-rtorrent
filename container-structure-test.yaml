@@ -2,12 +2,12 @@ schemaVersion: 2.0.0
 
 # Test that rtorrent binary and required libraries exist
 fileExistenceTests:
-  - name: 'rtorrent binary'
-    path: '/usr/local/bin/rtorrent'
+  - name: "rtorrent binary"
+    path: "/usr/local/bin/rtorrent"
     shouldExist: true
-    permissions: '-rwxr-xr-x'
-  - name: 'SSL library'
-    path: '/usr/lib/x86_64-linux-gnu/libssl.so.3'
+    permissions: "-rwxr-xr-x"
+  - name: "SSL library"
+    path: "/usr/lib/x86_64-linux-gnu/libssl.so.3"
     shouldExist: true
 
 # Test that rtorrent can run and displays help

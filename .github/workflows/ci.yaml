@@ -26,40 +26,31 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - version: 'master'
-            tag_for_test: master
-            tags: |
-              type=raw,value=master
-          - version: 'master'
+          - version: "master"
+            tag: master
+          - version: "master"
             extra_configure_args: --enable-debug
-            tag_for_test: master-debug
+            tag: master-debug
+          - version: "v0.16.1"
+            tag: v0.16.1
             tags: |
-              type=raw,value=master-debug
-          - version: 'v0.16.1'
-            tags: |
-              type=raw,value=v0.16.1
               type=raw,value=v0.16
               type=raw,value=latest
-          - version: 'v0.16.0'
+          - version: "v0.16.0"
+            tag: v0.16.0
+          - version: "v0.15.7"
+            tag: "v0.15.7"
             tags: |
-              type=raw,value=v0.16.0
-          - version: 'v0.15.7'
-            tags: |
-              type=raw,value=v0.15.7
               type=raw,value=v0.15
               type=raw,value=stable
-          - version: 'v0.15.6'
-            tags: |
-              type=raw,value=v0.15.6
-          - version: 'v0.15.5'
-            tags: |
-              type=raw,value=v0.15.5
-          - version: 'v0.15.4'
-            tags: |
-              type=raw,value=v0.15.4
-          - version: 'v0.15.3'
-            tags: |
-              type=raw,value=v0.15.3
+          - version: "v0.15.6"
+            tag: "v0.15.6"
+          - version: "v0.15.5"
+            tag: "v0.15.5"
+          - version: "v0.15.4"
+            tag: "v0.15.4"
+          - version: "v0.15.3"
+            tag: "v0.15.3"
 
     steps:
       - name: Checkout repository
@@ -79,7 +70,9 @@ jobs:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           flavor: |
             latest=false
-          tags: ${{ matrix.tags }}
+          tags: |
+            type=raw,value=${{ matrix.tag }} 
+            ${{ matrix.tags }}
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -103,9 +96,9 @@ jobs:
       # Test the built image by running rtorrent with --help flag
       - name: Test container - run rtorrent help
         run: |
-          IMAGE_TAG="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ matrix.tag_for_test ||matrix.version }}"
+          IMAGE_TAG="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ matrix.tag }}"
           echo "Testing image: $IMAGE_TAG"
-          
+
           # Run rtorrent with --help to verify it works
           docker run --rm "$IMAGE_TAG" -h | grep -q "Usage:"
           echo "✓ rtorrent help command succeeded"
@@ -117,10 +110,10 @@ jobs:
           curl -LO https://storage.googleapis.com/container-structure-test/latest/container-structure-test-linux-amd64
           chmod +x container-structure-test-linux-amd64
           sudo mv container-structure-test-linux-amd64 /usr/local/bin/container-structure-test
-          
-          IMAGE_TAG="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ matrix.tag_for_test || matrix.version }}"
+
+          IMAGE_TAG="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ matrix.tag }}"
           echo "Running structure tests on image: $IMAGE_TAG"
-          
+
           # Run the structure tests
           container-structure-test test --image "$IMAGE_TAG" --config container-structure-test.yaml
 
@@ -135,7 +128,3 @@ jobs:
             echo "Pushing $tag"
             docker push "$tag"
           done
-
-
-
-
