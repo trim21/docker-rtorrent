@@ -1,7 +1,8 @@
 # syntax=docker/dockerfile:1
 
-ARG LIBTORRENT_VERSION=0.15.7
-ARG RTORRENT_VERSION=0.15.7
+ARG LIBTORRENT_VERSION=refs/tags/v0.15.7
+ARG RTORRENT_VERSION=refs/tags/v0.15.7
+ARG EXTRA_CONFIGURE_ARGS=""
 
 FROM debian:13-slim@sha256:66b37a5078a77098bfc80175fb5eb881a3196809242fd295b25502854e12cbec AS base
 
@@ -16,8 +17,9 @@ RUN apt-get install -y --no-install-recommends \
 
 WORKDIR /usr/src
 
-RUN curl -sSL https://github.com/rakshasa/libtorrent/archive/refs/tags/v${LIBTORRENT_VERSION}.tar.gz -o libtorrent-${LIBTORRENT_VERSION}.tar.gz
-RUN curl -sSL https://github.com/rakshasa/rtorrent/archive/refs/tags/v${RTORRENT_VERSION}.tar.gz -o rtorrent-${RTORRENT_VERSION}.tar.gz
+#https://github.com/rakshasa/libtorrent/archive/919d23923ad0a483fa24441093eda1c12cea4c0b.zip
+RUN curl -sSL https://github.com/rakshasa/libtorrent/archive/${LIBTORRENT_VERSION}.tar.gz -o libtorrent-${LIBTORRENT_VERSION}.tar.gz
+RUN curl -sSL https://github.com/rakshasa/rtorrent/archive/${RTORRENT_VERSION}.tar.gz -o rtorrent-${RTORRENT_VERSION}.tar.gz
 
 RUN tar xzf libtorrent-${LIBTORRENT_VERSION}.tar.gz && \
     mv libtorrent-${LIBTORRENT_VERSION} /libtorrent && \
@@ -44,7 +46,7 @@ COPY --from=src /rtorrent /rtorrent/
 
 RUN cd /libtorrent && \
     autoreconf -ivf && \
-    ./configure --enable-aligned --disable-shared --enable-static && \
+    ./configure --enable-aligned --disable-shared --enable-static ${EXTRA_CONFIGURE_ARGS} && \
     make -j$(nproc) CXXFLAGS="-w -O3 -flto -Werror=odr -Werror=lto-type-mismatch -Werror=strict-aliasing" && \
     make install
 
@@ -52,7 +54,7 @@ WORKDIR /usr/src
 
 RUN cd /rtorrent/ && \
     autoreconf -ivf && \
-    ./configure --with-ncurses --without-ncursesw --with-xmlrpc-tinyxml2 --with-posix-fallocate && \
+    ./configure --with-ncurses --without-ncursesw --with-xmlrpc-tinyxml2 --with-posix-fallocate ${EXTRA_CONFIGURE_ARGS} && \
     make -j$(nproc) CXXFLAGS="-w -O3 -flto -Werror=odr -Werror=lto-type-mismatch -Werror=strict-aliasing" && \
     make install
 

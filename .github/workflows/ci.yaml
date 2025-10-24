@@ -26,29 +26,45 @@ jobs:
       fail-fast: false
       matrix:
         include:
+          - version: 'master'
+            ref: heads/master
+            tags: |
+              type=raw,value=master
+          - version: 'master'
+            ref: heads/master
+            extra_configure_args: --enable-debug
+            tags: |
+              type=raw,value=master-debug
           - version: '0.16.1'
+            ref: refs/tags/v0.16.1
             tags: |
               type=raw,value=v0.16.1
               type=raw,value=v0.16
               type=raw,value=latest
           - version: '0.16.0'
+            ref: refs/tags/v0.16.0
             tags: |
               type=raw,value=v0.16.0
           - version: '0.15.7'
+            ref: refs/tags/v0.15.7
             tags: |
               type=raw,value=v0.15.7
               type=raw,value=v0.15
               type=raw,value=stable
           - version: '0.15.6'
+            ref: refs/tags/v0.15.6
             tags: |
               type=raw,value=v0.15.6
           - version: '0.15.5'
+            ref: refs/tags/v0.15.5
             tags: |
               type=raw,value=v0.15.5
           - version: '0.15.4'
+            ref: refs/tags/v0.15.4
             tags: |
               type=raw,value=v0.15.4
           - version: '0.15.3'
+            ref: refs/tags/v0.15.3
             tags: |
               type=raw,value=v0.15.3
 
@@ -87,8 +103,9 @@ jobs:
           cache-to: type=gha,mode=max
           load: true
           build-args: |
-            LIBTORRENT_VERSION=${{ matrix.version }}
-            RTORRENT_VERSION=${{ matrix.version }}
+            LIBTORRENT_VERSION=${{ matrix.ref }}
+            RTORRENT_VERSION=${{ matrix.ref }}
+            EXTRA_CONFIGURE_ARGS=${{ matrix.extra_configure_args }}
 
       # Test the built image by running rtorrent with --help flag
       - name: Test container - run rtorrent help
