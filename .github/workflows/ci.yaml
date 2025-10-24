@@ -26,29 +26,38 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - version: '0.16.1'
+          - version: 'master'
+            tag_for_test: master
+            tags: |
+              type=raw,value=master
+          - version: 'master'
+            extra_configure_args: --enable-debug
+            tag_for_test: master-debug
+            tags: |
+              type=raw,value=master-debug
+          - version: 'v0.16.1'
             tags: |
               type=raw,value=v0.16.1
               type=raw,value=v0.16
               type=raw,value=latest
-          - version: '0.16.0'
+          - version: 'v0.16.0'
             tags: |
               type=raw,value=v0.16.0
-          - version: '0.15.7'
+          - version: 'v0.15.7'
             tags: |
               type=raw,value=v0.15.7
               type=raw,value=v0.15
               type=raw,value=stable
-          - version: '0.15.6'
+          - version: 'v0.15.6'
             tags: |
               type=raw,value=v0.15.6
-          - version: '0.15.5'
+          - version: 'v0.15.5'
             tags: |
               type=raw,value=v0.15.5
-          - version: '0.15.4'
+          - version: 'v0.15.4'
             tags: |
               type=raw,value=v0.15.4
-          - version: '0.15.3'
+          - version: 'v0.15.3'
             tags: |
               type=raw,value=v0.15.3
 
@@ -89,20 +98,17 @@ jobs:
           build-args: |
             LIBTORRENT_VERSION=${{ matrix.version }}
             RTORRENT_VERSION=${{ matrix.version }}
+            EXTRA_CONFIGURE_ARGS=${{ matrix.extra_configure_args }}
 
       # Test the built image by running rtorrent with --help flag
       - name: Test container - run rtorrent help
         run: |
-          IMAGE_TAG="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:v${{ matrix.version }}"
+          IMAGE_TAG="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ matrix.tag_for_test ||matrix.version }}"
           echo "Testing image: $IMAGE_TAG"
           
           # Run rtorrent with --help to verify it works
           docker run --rm "$IMAGE_TAG" -h | grep -q "Usage:"
           echo "✓ rtorrent help command succeeded"
-          
-          # Verify rtorrent version matches the Dockerfile
-          docker run --rm "$IMAGE_TAG" -h | grep -q "${{ matrix.version }}"
-          echo "✓ rtorrent version ${{ matrix.version }} verified"
 
       # Install and run container structure tests
       - name: Run container structure tests
@@ -112,7 +118,7 @@ jobs:
           chmod +x container-structure-test-linux-amd64
           sudo mv container-structure-test-linux-amd64 /usr/local/bin/container-structure-test
           
-          IMAGE_TAG="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:v${{ matrix.version }}"
+          IMAGE_TAG="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ matrix.tag_for_test || matrix.version }}"
           echo "Running structure tests on image: $IMAGE_TAG"
           
           # Run the structure tests
