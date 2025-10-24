@@ -1,4 +1,10 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": ["local>trim21/renovate-config"]
+  "extends": ["local>trim21/renovate-config"],
+  "packageRules": [
+    {
+      "matchPackageNames": ["docker/dockerfile"],
+      "enabled": false
+    }
+  ]
 }
