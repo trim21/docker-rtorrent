@@ -27,18 +27,22 @@ jobs:
       matrix:
         include:
           - version: "master"
+            extra_configure_args: --with-lua
             tag: master
           - version: "master"
-            extra_configure_args: --enable-debug
+            extra_configure_args: --enable-debug --with-lua
             tag: master-debug
           - version: "v0.16.1"
             tag: v0.16.1
+            extra_configure_args: --with-lua
             tags: |
               type=raw,value=v0.16
               type=raw,value=latest
           - version: "v0.16.0"
             tag: v0.16.0
+            extra_configure_args: --with-lua
           - version: "v0.15.7"
+            extra_configure_args: --with-lua
             tag: "v0.15.7"
             tags: |
               type=raw,value=v0.15
