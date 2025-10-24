@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
 
-ARG LIBTORRENT_VERSION=refs/tags/v0.15.7
-ARG RTORRENT_VERSION=refs/tags/v0.15.7
+ARG LIBTORRENT_VERSION=v0.15.7
+ARG RTORRENT_VERSION=v0.15.7
 ARG EXTRA_CONFIGURE_ARGS=""
 
 FROM debian:13-slim@sha256:66b37a5078a77098bfc80175fb5eb881a3196809242fd295b25502854e12cbec AS base
@@ -12,7 +12,7 @@ FROM base AS src
 ARG LIBTORRENT_VERSION
 ARG RTORRENT_VERSION
 RUN apt-get install -y --no-install-recommends \
-    curl \
+    git \
     ca-certificates
 
 WORKDIR /usr/src
@@ -21,10 +21,8 @@ WORKDIR /usr/src
 RUN curl -sSL https://github.com/rakshasa/libtorrent/archive/${LIBTORRENT_VERSION}.tar.gz -o libtorrent-${LIBTORRENT_VERSION}.tar.gz
 RUN curl -sSL https://github.com/rakshasa/rtorrent/archive/${RTORRENT_VERSION}.tar.gz -o rtorrent-${RTORRENT_VERSION}.tar.gz
 
-RUN tar xzf libtorrent-${LIBTORRENT_VERSION}.tar.gz && \
-    mv libtorrent-${LIBTORRENT_VERSION} /libtorrent && \
-    tar xzf rtorrent-${RTORRENT_VERSION}.tar.gz && \
-    mv rtorrent-${RTORRENT_VERSION} /rtorrent
+RUN git clone https://github.com/rakshasa/libtorrent /libtorrent --depth=1 --branch ${LIBTORRENT_VERSION}
+RUN git clone https://github.com/rakshasa/rtorrent /rtorrent --depth=1 --branch ${LIBTORRENT_VERSION}
 
 FROM base AS build-stage
 
